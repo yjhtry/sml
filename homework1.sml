@@ -107,7 +107,7 @@ fun what_month(d: int) =
     number_before_reaching_sum(d, MONTHS_DAYS) + 1
   end
 
-val test9 = what_month 70
+val test9 = what_month 70 = 3
 
 (* Write a function month_range that takes two days of the year day1 and day2 and returns an int list
 [m1,m2,...,mn] where m1 is the month of day1, m2 is the month of day1+1, ..., and mn is the month
@@ -142,21 +142,75 @@ fun oldest(xs: (int * int * int) list) =
 val test11 = oldest([(2012,2,28),(2011,3,31),(2011,4,28)]) = SOME (2011,3,31)
 
 
-(* ********** Challenge *************** *)
+(* ********** Challenge start *************** *)
 
-(* fun includes(xs: int list, x: int) =
+
+fun deduplication(xs: int list, res: int list) =
   if null xs
-  then false
-  else if hd(xs) = x
-    then true
-    else includes(tl(xs), x)
-
-fun deduplication(xs: int list) =
-  if null xs
-  then []
-  else 
-    let 
-      fun forEach(xs: int list) =
-
+  then res
+  else let
+    fun includes(xs: int list, x: int) =
+      if null xs
+      then false
+      else if hd(xs) = x
+        then true
+        else includes(tl(xs), x)
     in
-    end *)
+      if includes(res, hd(xs))
+      then deduplication(tl(xs), res)
+      else deduplication(tl(xs), (res @ [hd(xs)]))
+    end
+
+fun number_in_months_challenge(ms: (int * int * int) list, ns: int list) =
+  number_in_months(ms, deduplication(ns, []))
+
+val test12 = number_in_months_challenge ([(2012,2,28),(2013,12,1),(2011,3,31),(2011,4,28)],[2,3,4,2,5,4]) = 3
+
+fun dates_in_months_challenge(xs: (int * int * int) list, ms: int list) =
+  dates_in_months(xs, deduplication(ms, []))
+
+val test13 = dates_in_months_challenge ([(2012,2,28),(2013,12,1),(2011,3,31),(2011,4,28)],[2,3,4,2,3]) = [(2012,2,28),(2011,3,31),(2011,4,28)]
+
+
+fun reasonable_date(d: int * int * int) = 
+  let
+    val MONTHS_DAYS_1 = [31,28,31,30,31,30,31,31,30,31,30,31]
+    val MONTHS_DAYS_2 = [31,29,31,30,31,30,31,31,30,31,30,31]
+    val y = #1 d
+    val m = #2 d
+    val d = #3 d
+    val is_run = (y mod 400 = 0 orelse y mod 4 = 0) andalso y mod 100 <> 0
+    fun get_nth_int(xs: int list, idx: int) =
+      if null xs
+      then 0
+      else if idx = 1
+        then hd xs
+        else get_nth_int(tl xs, idx - 1)
+
+    val md = get_nth_int((if is_run then MONTHS_DAYS_2 else MONTHS_DAYS_1), m)
+  in
+    if y < 1
+    then false
+    else if (m < 1) orelse (m > 12)
+      then false
+      else if (d < 1) orelse (d > md)
+        then false 
+        else true
+  end
+
+fun test_reasonable_date() =
+  let
+    val test1 = reasonable_date((1, 13, 22)) = false
+    val test2 = reasonable_date((2024, 5, 1)) = true
+    val test3 = reasonable_date((2008, 2, 29)) = true
+    val test4 = reasonable_date((2007, 2, 29)) = false
+    val test5 = reasonable_date((2007, 4, 31)) = false
+
+    val res = test1 andalso test2 andalso test3 andalso test4 andalso test5
+  in
+    res
+  end
+
+val test13 = test_reasonable_date()
+
+(* ********** Challenge end *************** *)
