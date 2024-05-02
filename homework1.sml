@@ -161,6 +161,9 @@ fun deduplication(xs: int list, res: int list) =
       else deduplication(tl(xs), (res @ [hd(xs)]))
     end
 
+ (* Challenge Problem: Write functions number_in_months_challenge and dates_in_months_challenge
+that are like your solutions to problems 3 and 5 except having a month in the second argument multiple
+times has no more effect than having it once. (Hint: Remove duplicates, then use previous work.) *)
 fun number_in_months_challenge(ms: (int * int * int) list, ns: int list) =
   number_in_months(ms, deduplication(ns, []))
 
@@ -172,6 +175,11 @@ fun dates_in_months_challenge(xs: (int * int * int) list, ms: int list) =
 val test13 = dates_in_months_challenge ([(2012,2,28),(2013,12,1),(2011,3,31),(2011,4,28)],[2,3,4,2,3]) = [(2012,2,28),(2011,3,31),(2011,4,28)]
 
 
+(* Challenge Problem: Write a function reasonable_date that takes a date and determines if it
+describes a real date in the common era. A “real date” has a positive year (year 0 did not exist), a
+month between 1 and 12, and a day appropriate for the month. Solutions should properly handle leap
+years. Leap years are years that are either divisible by 400 or divisible by 4 but not divisible by 100.
+(Do not worry about days possibly lost in the conversion to the Gregorian calendar in the Late 1500s.) *)
 fun reasonable_date(d: int * int * int) = 
   let
     val MONTHS_DAYS_1 = [31,28,31,30,31,30,31,31,30,31,30,31]
