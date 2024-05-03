@@ -70,3 +70,88 @@ fun repeat(xs: int list * int list) =
   end
 
 val test5 = repeat ([1,2,3], [4,0,3]) = [1,1,1,1,3,3,3]
+
+
+fun addOpt(a: int option, b: int option) =
+  if isSome a andalso isSome b
+  then SOME(valOf a + valOf b)
+  else NONE
+
+
+val test6 = addOpt(SOME(1), SOME(2)) = SOME(3)
+
+
+fun addAllOpt(xs: int option list) =
+  if null xs
+  then NONE
+  else if isSome (hd(xs))
+    then let 
+      val first = valOf (hd(xs))
+      val rest = addAllOpt(tl xs)
+    in
+      if isSome rest
+      then SOME(first + (valOf rest))
+      else SOME(first)
+    end
+    else addAllOpt(tl xs)
+
+val test7 = addAllOpt([SOME(1), NONE, SOME(4), NONE, NONE, SOME(~2)]) = SOME(3)
+
+fun any(xs: bool list) =
+  if null xs
+  then false
+  else if hd xs = true
+  then true
+  else any(tl xs)
+
+val test8 = any([false, false, true, false]) = true
+
+fun all(xs: bool list) =
+  if null xs
+  then true
+  else if hd xs = false
+  then false
+  else all(tl xs)
+
+
+val test8 = all([true, true, true, false]) = false
+
+
+fun zip(a: int list, b: int list) =
+  if null a orelse null b
+  then []
+  else (hd(a), hd(b)) :: zip(tl a, tl b)
+
+val test9 = zip([1,2,3,4], [9,8,7]) = [(1,9),(2,8),(3,7)]
+
+fun len(xs: int list) =
+  if null xs
+  then 0
+  else 1 + len(tl xs)
+
+fun zipRecycle(oa: int list, ob: int list) =
+  let
+    val len_oa = len(oa)
+    val len_ob = len(ob)
+    fun zip_in(na: int list, nb: int list) =
+      if null na andalso not (null nb) andalso len_oa < len_ob
+      then (hd(oa), hd(nb)) :: zip_in(tl oa, tl nb)
+      else if null nb andalso not (null na) andalso len_ob < len_oa
+      then (hd(na), hd(ob)) :: zip_in(tl na, tl ob)
+      else if not (null na) andalso not (null nb)
+      then (hd(na), hd(nb)) :: zip_in(tl na, tl nb)
+      else []
+        
+  in
+    zip_in(oa, ob)
+  end
+
+val test10 = zipRecycle([1,2,3,4], [9,8,7,1,2,3]) = [(1,9),(2,8),(3,7),(4,1),(1,2),(2,3)]
+
+fun zipOpt(a: int list, b: int list) =
+   if len(a) <> len(b)
+   then NONE
+   else SOME(zip(a, b))
+
+val test11 = zipOpt([1,2,3], [4,5,6]) = SOME([(1,4),(2,5),(3,6)])
+val test12 = zipOpt([1,2,3], [4,5]) = NONE
