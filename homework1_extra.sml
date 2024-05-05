@@ -114,7 +114,7 @@ fun all(xs: bool list) =
   else all(tl xs)
 
 
-val test8 = all([true, true, true, false]) = false
+val test9 = all([true, true, true, false]) = false
 
 
 fun zip(a: int list, b: int list) =
@@ -122,7 +122,7 @@ fun zip(a: int list, b: int list) =
   then []
   else (hd(a), hd(b)) :: zip(tl a, tl b)
 
-val test9 = zip([1,2,3,4], [9,8,7]) = [(1,9),(2,8),(3,7)]
+val test11 = zip([1,2,3,4], [9,8,7]) = [(1,9),(2,8),(3,7)]
 
 fun len(xs: int list) =
   if null xs
@@ -146,12 +146,171 @@ fun zipRecycle(oa: int list, ob: int list) =
     zip_in(oa, ob)
   end
 
-val test10 = zipRecycle([1,2,3,4], [9,8,7,1,2,3]) = [(1,9),(2,8),(3,7),(4,1),(1,2),(2,3)]
+val test11 = zipRecycle([1,2,3,4], [9,8,7,1,2,3]) = [(1,9),(2,8),(3,7),(4,1),(1,2),(2,3)]
 
 fun zipOpt(a: int list, b: int list) =
    if len(a) <> len(b)
    then NONE
    else SOME(zip(a, b))
 
-val test11 = zipOpt([1,2,3], [4,5,6]) = SOME([(1,4),(2,5),(3,6)])
-val test12 = zipOpt([1,2,3], [4,5]) = NONE
+val test12_1 = zipOpt([1,2,3], [4,5,6]) = SOME([(1,4),(2,5),(3,6)])
+val test12_2 = zipOpt([1,2,3], [4,5]) = NONE
+
+fun lookup(xs: (string * int) list, s: string) =
+  if null xs
+  then NONE
+  else if #1 (hd(xs)) = s
+  then SOME(#2 (hd(xs)))
+  else lookup(tl xs, s)
+
+
+val test13_1 = lookup([("hello", 1)], "hello")
+val test13_2 = lookup([("helloo", 1)], "hello")
+
+fun splitup(xs: int list) =
+  if null xs
+  then ([], [])
+  else let
+    fun gt(xs: int list, n: int) =
+      if null xs
+      then []
+      else if hd(xs) > n
+      then hd(xs) :: gt(tl xs, n)
+      else gt(tl xs, n)
+    fun lt(xs: int list, n: int) =
+      if null xs
+      then []
+      else if hd(xs) < n
+      then hd(xs) :: lt(tl xs, n)
+      else lt(tl xs, n)
+  in
+  (gt(xs, ~1), lt(xs, 0))
+  end
+
+val test14 = splitup([1,2,3,4,~1,~3,1,2,~9]) = ([1,2,3,4,1,2],[~1,~3,~9])
+
+fun splitAt(xs: int list, n) =
+  if null xs
+  then ([], [])
+  else let
+    fun gt(xs: int list) =
+      if null xs
+      then []
+      else if hd(xs) >= n
+      then hd(xs) :: gt(tl xs)
+      else gt(tl xs)
+    fun lt(xs: int list) =
+      if null xs
+      then []
+      else if hd(xs) < n
+      then hd(xs) :: lt(tl xs)
+      else lt(tl xs)
+  in
+  (gt(xs), lt(xs))
+  end
+
+val test15 = splitAt([1,2,3,4,~1,~3,1,2,~9], 3) = ([3,4],[1,2,~1,~3,1,2,~9])
+
+fun isSorted(xs: int list) =
+  if null xs
+  then true
+  else let
+    fun compare(xs: int list, n: int) =
+      if null xs
+      then true
+      else if n < hd(xs)
+      then compare(tl xs, hd(xs))
+      else false
+  in
+    compare(tl xs, hd xs)
+  end
+
+val test16_1 = isSorted([1,2,3,4,5]) = true
+val test16_2 = isSorted([1,2,4,3,5]) = false
+
+fun isAnySorted(xs: int list) =
+ if null xs
+  then true
+  else let
+    fun predicate_gt(a: int, b: int) =
+      a > b
+    fun predicate_lt(a: int, b: int) =
+      a < b
+    fun compare(xs: int list, n: int, predicate) =
+      if null xs
+      then true
+      else if predicate(n, hd(xs))
+      then compare(tl xs, hd(xs), predicate)
+      else false
+  in
+    compare(tl xs, hd xs, predicate_gt) orelse compare(tl xs, hd xs, predicate_lt)
+  end 
+
+
+val test17_1 = isAnySorted([1,2,3,4,5]) = true
+val test17_2 = isAnySorted([1,2,4,3,5]) = false
+val test17_3 = isAnySorted([5,4,3,2,1]) = true
+val test17_4 = isAnySorted([5,3,2,4,1]) = false
+
+
+fun sortedMerge(a: int list, b: int list) =
+  if null a andalso null b
+  then []
+  else if null a andalso not (null b)
+  then b
+  else if null b andalso not (null a)
+  then a
+  else if hd(a) > hd(b)
+  then hd(b) :: sortedMerge(a, tl b)
+  else hd(a) :: sortedMerge(tl a, b)
+
+
+val test18 = sortedMerge([1,4,7], [5,8,9]) = [1,4,5,7,8,9]
+
+fun qsort(xs: int list) =
+  if null xs
+  then []
+  else let
+    val first = hd(xs)
+    val res = splitAt(tl xs, first)
+    val left = #1 res
+    val right  = #2 res
+  in
+    qsort(right) @ [first] @ qsort(left)
+  end
+
+
+val test19 = qsort([1,4,2,6,5,3,4,1])
+
+fun divide(xs: int list) =
+  if null xs
+  then ([], [])
+  else let
+    fun skip_one(xs: int list, skip: bool) =
+    if null xs
+    then []
+    else if skip
+    then skip_one(tl xs, false)
+    else hd(xs) :: skip_one(tl xs, true)
+  in
+  (skip_one(xs, false), skip_one(tl xs, false))
+  end
+
+val test20 = divide ([1,2,3,4,5,6,7]) = ([1,3,5,7], [2,4,6])
+
+fun fullDivide(p: int * int) =
+  let
+    val p1 = #1 p
+    val p2 = #2 p
+
+    fun full(a: int, b: int, c: int) =
+      if (b mod a) = 0
+      then full(a, (b div a), c + 1)
+      else (c, b)
+  in
+    full(p1, p2, 0)
+  end
+
+
+val test21_1 = fullDivide(2, 40) = (3, 5)
+val test21_2 = fullDivide(3, 10) = (0, 10)
