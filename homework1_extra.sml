@@ -308,9 +308,60 @@ fun fullDivide(p: int * int) =
       then full(a, (b div a), c + 1)
       else (c, b)
   in
-    full(p1, p2, 0)
+    if p2 <> 0
+    then full(p1, p2, 0)
+    else (0, 0)
   end
 
 
 val test21_1 = fullDivide(2, 40) = (3, 5)
 val test21_2 = fullDivide(3, 10) = (0, 10)
+
+fun factorize(n: int) =
+  let
+    fun loop(n: int, c: int) =
+      let 
+        val res = fullDivide(c, n)
+        val count = #1 res
+        val nn = #2 res
+      in
+        if nn = n
+        then if n >= c then [(n, 1)] else []
+        else (c, count) :: loop(nn, c + 1)
+      end
+  in
+    loop(n, 2)
+  end
+
+val test22_1 = factorize(20) = [(2,2), (5,1)]
+val test22_2 = factorize(36) = [(2,2), (3,2)]
+
+fun multiply(xs: (int * int) list) =
+  if null xs
+  then 1
+  else let
+    fun loop(n: int, c: int) =
+      if c > 0
+      then n * loop(n, c - 1)
+      else 1
+  in
+    loop(hd(xs)) * multiply(tl xs)
+  end
+
+val test23_1 = multiply([(2,2), (3,2)])
+val test23_2 = multiply([(2,2), (5,1)])
+
+fun all_products(xs: (int * int) list) =
+  let
+    val n = multiply(xs)
+    fun loop(c: int, t: int) =
+      if t > 0
+      then if n mod c = 0
+        then [c] @ loop(c + 1, t - 1)
+        else [] @ loop(c + 1, t - 1)
+      else []
+  in
+  loop(1, n)
+  end
+
+val d = all_products([(2,2), (5,1)]) = [1,2,4,5,10,20]
