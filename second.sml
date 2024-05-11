@@ -124,4 +124,14 @@ fun un_zip3 lst =
 val test11 = un_zip3(test10)
 
 
-val d = 2::[3]
+
+val cbs : (int -> unit) list ref = ref []
+
+fun onKeyEvent f = cbs := f::(!cbs) (* The only "public" binding *)
+
+fun onEvent i =
+  let fun loop fs =
+    case fs of
+    [] => ()
+    | f::fs => (f i; loop fs)
+  in loop (!cbs) end

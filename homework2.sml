@@ -103,5 +103,39 @@ fun remove_card(cs, c: card, e) =
   | hd::tl => if hd = c then tl else hd::remove_card(tl, c, e)
 
 
-
 val test7 = remove_card ([(Hearts, Ace)], (Hearts, Ace), IllegalMove) = []
+
+fun all_same_color(cs) =
+  case cs of
+    [] => true
+  | hd::[] => true
+  | (s1, _)::(s2, _)::tl => if s1 = s2 then all_same_color(tl) else false
+
+val test8 = all_same_color [(Hearts, Ace), (Hearts, Ace)] = true
+
+
+fun sum_cards(xs) =
+  let
+    fun sum(xs, t) =
+        case xs of
+          [] => t
+        | hd::tl => sum(tl, t + card_value(hd))
+  in
+    sum(xs, 0)
+  end
+
+val test9 = sum_cards [(Clubs, Num 2),(Clubs, Num 2)] = 4
+
+
+fun score(cs, t) =
+  let
+    val sum = sum_cards(cs)
+  in
+    case (sum > t, all_same_color(cs)) of
+     (true, true) =>  (sum * 2) div 2
+    | (true, false) => sum * 3
+    | (false, true) => (t - sum) div 2
+    | (false, false) => t - sum
+  end
+
+val test10 = score ([(Hearts, Num 2),(Clubs, Num 4)],10)  = 4 w
