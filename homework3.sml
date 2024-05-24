@@ -107,12 +107,22 @@ fun count_some_var v =
 val test9c = count_some_var ("x", Variable("x")) = 1
 
 
- (* todo *)
-(* fun check_pat v =
-  case v of
-     Variable(s) => true
-   | TupleP(xs) => List.foldl (fn (curr, acc) => case curr of
-      pat1 => body1
-    | pat2 => body2) true xs
-   | ConstructorP(_, p) => check_pat(p)
-   | _ => true *)
+fun check_pat v =
+  let
+    val ll = ref []
+
+    fun contains p = 
+      if (List.exists (fn a => a = p) (!ll)) then false else (let val _ = ll := p::(!ll) in true end)
+
+    fun loop(v) =
+      case v of
+        Variable(s) => contains s
+      | TupleP(x::xs') => loop(x) andalso loop(TupleP xs')
+      | ConstructorP(_, p) => loop(p)
+      | _ => true
+  in
+    loop(v)
+  end
+
+val test10_1 = check_pat (Variable("x")) = true
+val test10_2 = check_pat (TupleP([Variable("x"), Variable("x")])) = false
